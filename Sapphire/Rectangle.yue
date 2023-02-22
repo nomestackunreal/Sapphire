@@ -1,0 +1,13 @@
+Element = require('Sapphire.Element')
+
+return (master, x=0, y=0, width=50, height=50) ->
+    rectangle = Element(master, x, y, width, height)
+
+    style = rectangle.style
+    style.radius = 0
+
+    rectangle.draw = ->
+        love.graphics.setColor(style.color[1], style.color[2], style.color[3], style.alpha)
+        love.graphics.rectangle('fill', style.x, style.y, style.width, style.height, style.radius, style.radius)
+
+    return rectangle

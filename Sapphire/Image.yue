@@ -1,0 +1,22 @@
+Element = require('Sapphire.Element')
+
+return (options) ->
+    image = Element(options.master, options.x, options.y, options.source::getWidth(), options.source::getHeight())
+    
+    style = image.style
+
+    style.source = options.source
+    style.scalex = options.scalex or options.scale or 1
+    style.scaley = options.scaley or options.scale or 1
+
+    image.scale = (scalex, scaley) ->
+        style.scalex = scalex
+        style.scaley = scaley
+        style.width = style.source::getWidth() * style.scalex
+        style.height = style.source::getHeight() * style.scaley
+
+    image.draw = ->
+        love.graphics.setColor(unpack style.color)
+        love.graphics.draw(style.source, style.x, style.y, nil, style.scalex, style.scaley)
+
+    return image

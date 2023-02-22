@@ -1,0 +1,14 @@
+return (options) ->
+    margin = {}
+
+    margin.master = options.master
+    margin.style = {}
+    margin.style.positionMode = options.position or 'relative'
+    margin.style.x = 0
+    margin.style.y = 0
+    margin.style.width = options.horizontal ?? 0
+    margin.style.height = options.vertical ?? 0
+
+    margin.draw = ->
+
+    return margin

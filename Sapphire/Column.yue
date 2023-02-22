@@ -1,0 +1,104 @@
+return (options) ->
+    column = {}
+
+    column.elements = {}
+    column.x = options.x
+    column.y = options.y
+    column.width = options.width or love.graphics.getWidth()
+    column.height = options.height or love.graphics.getHeight()
+    column.spacing = options.spacing or 0
+    column.justifyContent = options['justify-content'] or 'center'
+    column.background = options.background or {
+        enabled: false,
+        color: { 0, 0, 0 }
+    }
+
+    call = (function_name, arguments={}) ->
+        for element in *column.elements
+            if element[function_name] != nil
+                element[function_name](unpack arguments)
+        -- love.graphics.setColor(1, 0, 0)
+        -- love.graphics.rectangle('line', column.x, column.y, column.width, column.height)
+
+    draw = ->
+        if column.background.enabled
+            love.graphics.setColor(unpack column.background.color)
+            love.graphics.rectangle('fill', column.x, column.y, column.width, column.height)
+        call('draw')
+
+    onPressed = (x, y) ->
+        call('onPressed', { x, y })
+
+    onReleased = ->
+        call('onReleased')
+
+    justify = ->
+        switch column.justifyContent
+            when 'center'
+                for element in *column.elements
+                    if element.style.positionMode == 'relative'
+                        element.style.x = column.x + (column.width / 2) - element.style.width / 2
+            when 'left'
+                for element in *column.elements
+                    if element.style.positionMode == 'relative'
+                        element.style.x = column.x
+            when 'right'
+                for element in *column.elements
+                    if element.style.positionMode == 'relative'
+                        element.style.x = (column.x + column.width) - element.style.width
+
+    align = ->
+        y = column.y
+        for element in *column.elements
+            if element.style.positionMode == 'relative'
+                element.style.y = y
+                y += element.style.height + column.spacing
+        justify()
+
+    size = (width, height) ->
+        column.width = width ?? column.width
+        column.height = height ?? column.height
+
+    fixsize = ->
+        height = 0
+        for element in *column.elements
+            height += element.style.height
+        column.height = height
+
+        width = 0
+        for element in *column.elements
+            if element.style.width > width
+                width = element.style.width
+        column.width = width
+
+
+    rawAppend = (element) ->
+        if (element.master == nil) then element.master = column
+        column.elements[] = element
+        fixsize()
+
+    append = (element) ->
+        rawAppend(element)
+        align()
+
+    background = (options) ->
+        column.background = {}
+        column.background.enabled = options.enabled ?? column.background.enabled
+        column.background.color = options.color ?? column.background.color
+
+    for child in *options.children
+        rawAppend(child)
+
+    return {
+        style: column,
+        append: append,
+        rawAppend: rawAppend,
+        align: align,
+        call: call,
+        size: size,
+        draw: draw,
+        background: background,
+        onPressed: onPressed,
+        onReleased: onReleased,
+        placeHorizontally: (mode) -> column.justifyContent = mode ?? column.justifyContent
+    }

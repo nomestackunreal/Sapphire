@@ -1,0 +1,66 @@
+Column = require('Sapphire.Column')
+Rectangle = require('Sapphire.Rectangle')
+Label = require('Sapphire.Label')
+Button = require('Sapphire.Button')
+Center = require('Sapphire.Center')
+Margin = require('Sapphire.Margin')
+Image = require('Sapphire.Image')
+
+spotify_logo = love.graphics.newImage('Assets/spotify-logo.png')
+boldBigger = love.graphics.newFont('Assets/GothamBold.ttf', 30)
+bold = love.graphics.newFont('Assets/GothamBold.ttf', 24)
+medium = love.graphics.newFont('Assets/GothamMedium.ttf')
+
+global root = Center(
+    Column({
+        background: {
+            enabled: true,
+            color: { 0.1, 0.1, 0.1 }
+        },
+        children: {
+            Margin({
+                vertical: 15
+            }), -- Margin
+            Label({
+                text: 'Spotify',
+                font: bold,
+                width: 200,
+            }), -- Label
+            Label({
+                text: 'Login to continue',
+                font: boldBigger,
+                width: 400
+            }), -- Label
+            Rectangle(),
+            Rectangle(),
+            Margin({
+                vertical: 15
+            }), -- Margin
+            Button({
+                text: 'Login',
+                width: 200,
+                height: 50,
+                color: { 0, 0, 0 },
+                onReleased: =>
+                    root.child.append(Label({ text: 'hello' }))
+                background: {
+                    enabled: true,
+                    color: { 1, 1, 1 },
+                    radius: 25
+                }
+            }), -- Label
+            Margin({
+                vertical: 15
+            }) -- Margin
+        }
+    }) -- Column
+) -- Center
+
+love.draw = ->
+    root.draw()
+
+love.mousepressed = (x, y) ->
+    root.onPressed(x, y)
+
+love.mousereleased = ->
+    root.onReleased()

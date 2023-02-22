@@ -1,0 +1,68 @@
+Element = require('Sapphire.Element')
+
+default_font = love.graphics.newFont(13)
+default_font::setFilter('nearest', 'nearest')
+
+return (options) ->
+    label = Element(options.master, options.x, options.y, options.width, options.height)
+    
+    style = label.style
+    style.color = options.color or { 1, 1, 1 }
+    style.text = options.text
+    style.font = options.font or default_font
+    style.width ??= style.font::getWidth(style.text)
+    style.height ??= style.font::getHeight()
+    style.text_align = options.textalign or 'center-center'
+    style.background = options.background or {
+        enabled: false,
+        color: { 1, 1, 1 },
+        alpha: 1,
+        radius: 5
+    }
+
+    label.background = (options) ->
+        style.background.enabled = options.enabled ?? style.background.enabled
+        style.background.color = options.color ?? style.background.color
+        style.background.alpha = options.alpha ?? style.background.alpha
+        style.background.radius = options.radius ?? style.background.radius
+
+    get_text_position = ->
+        text_width, text_height = style.font::getWidth(style.text), style.font::getHeight()
+        local x, y
+        if style.text_align == 'top-left'
+            x = style.x
+            y = style.y
+        elseif style.text_align == 'top-center'
+            x = style.x + (style.width / 2) - text_width / 2
+            y = style.y
+        elseif style.text_align == 'top-right'
+            x = (style.x + style.width) - text_width
+            y = style.y
+        elseif style.text_align == 'center-left'
+            x = style.x
+            y = style.y + (style.height / 2) - text_height / 2
+        elseif style.text_align == 'center-center'
+            x = style.x + (style.width / 2) - text_width / 2
+            y = style.y + (style.height / 2) - text_height / 2
+        elseif style.text_align == 'center-right'
+            x = (style.x + style.width) - text_width
+            y = style.y + (style.height / 2) - text_height / 2
+        return { x, y }
+
+    label.autosize = ->
+        style.width = style.font::getWidth(style.text)
+        style.height = style.font::getHeight()
+
+    label.aligntext = (mode) ->
+        style.text_align = mode ?? style.text_align
+
+    label.draw = ->
+        if style.background.enabled
+            bg = style.background
+            love.graphics.setColor(bg.color[1], bg.color[2], bg.color[3], bg.alpha)
+            love.graphics.rectangle('fill', style.x, style.y, style.width, style.height, bg.radius)
+        { text_x, text_y } = get_text_position()
+        love.graphics.setColor(style.color[1], style.color[2], style.color[3], style.alpha)
+        love.graphics.printf(style.text, style.font, style.x, text_y, style.width, 'center')
+
+    return label

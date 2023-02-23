@@ -1,7 +1,7 @@
 Element = require('Sapphire.Element')
 
 return (master, x=0, y=0, width=50, height=50) ->
-    rectangle = Element(master, x, y, width, height)
+    rectangle = Element(options)
 
     style = rectangle.style
     style.radius = 0

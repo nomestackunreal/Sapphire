@@ -1,22 +1,27 @@
-return (options) ->
+screenWidth, screenHeight = love.graphics.getDimensions()
+
+return (options={}) ->
     column = {}
 
+    column.type = 'column'
     column.elements = {}
-    column.x = options.x
-    column.y = options.y
-    column.width = options.width or love.graphics.getWidth()
-    column.height = options.height or love.graphics.getHeight()
-    column.spacing = options.spacing or 0
-    column.justifyContent = options['justify-content'] or 'center'
-    column.background = options.background or {
+    column.id = options.id ?? ''
+    column.positionMode = options.position ?? 'relative'
+    column.x = options.x ?? 0
+    column.y = options.y ?? 0
+    column.width = options.width ?? windowWidth
+    column.height = options.height ?? windowHeight
+    column.spacing = options.spacing ?? 0
+    column.justifyContent = options.justifyContent ?? 'center'
+    column.background = options.background ?? {
         enabled: false,
         color: { 0, 0, 0 }
     }
 
-    call = (function_name, arguments={}) ->
+    call = (functionName, arguments={}) ->
         for element in *column.elements
-            if element[function_name] != nil
-                element[function_name](unpack arguments)
+            if (element[functionName] != nil)
+                element[functionName](unpack arguments)
         -- love.graphics.setColor(1, 0, 0)
         -- love.graphics.rectangle('line', column.x, column.y, column.width, column.height)
 
@@ -32,32 +37,34 @@ return (options) ->
     onReleased = ->
         call('onReleased')
 
+    textInput = (t) ->
+        call('textInput', { t })
+
     justify = ->
         switch column.justifyContent
             when 'center'
                 for element in *column.elements
                     if element.style.positionMode == 'relative'
                         element.style.x = column.x + (column.width / 2) - element.style.width / 2
+                        if (element.align != nil) then element.align()
             when 'left'
                 for element in *column.elements
                     if element.style.positionMode == 'relative'
                         element.style.x = column.x
+                        if (element.align != nil) then element.align()
             when 'right'
                 for element in *column.elements
                     if element.style.positionMode == 'relative'
                         element.style.x = (column.x + column.width) - element.style.width
+                        if (element.align != nil) then element.align()
 
     align = ->
         y = column.y
         for element in *column.elements
-            if element.style.positionMode == 'relative'
+            if (element.style.positionMode == 'relative')
                 element.style.y = y
                 y += element.style.height + column.spacing
         justify()
-
-    size = (width, height) ->
-        column.width = width ?? column.width
-        column.height = height ?? column.height
 
     fixsize = ->
         height = 0
@@ -73,32 +80,55 @@ return (options) ->
 
 
     rawAppend = (element) ->
-        if (element.master == nil) then element.master = column
         column.elements[] = element
+        element.master = column
         fixsize()
 
     append = (element) ->
         rawAppend(element)
         align()
 
-    background = (options) ->
-        column.background = {}
-        column.background.enabled = options.enabled ?? column.background.enabled
-        column.background.color = options.color ?? column.background.color
-
     for child in *options.children
-        rawAppend(child)
+        append(child)
 
     return {
         style: column,
+        id: column.id,
         append: append,
         rawAppend: rawAppend,
         align: align,
         call: call,
-        size: size,
         draw: draw,
         background: background,
+        remove: (element) ->
+            for index, test in ipairs column.elements
+                if (test == element)
+                    table.remove(column.elements, index)
+            fixsize()
+            align()
+        getElementById: (id) ->
+            for element in *column.elements
+                if (element.id == id)
+                    return element
+        getElementByType: (type) ->
+            for element in *column.elements
+                if (element.type == type)
+                    return element
+        getElementsById: (id) ->
+            elements = {}
+            for element in *column.elements
+                if (element.id == id)
+                    elements[] = element
+            return elements
+        getElementsByType: (type) ->
+            elements = {}
+            for element in *column.elements
+                if (element.type == type)
+                    elements[] = element
+            return elements
         onPressed: onPressed,
         onReleased: onReleased,
-        placeHorizontally: (mode) -> column.justifyContent = mode ?? column.justifyContent
+        textInput: textInput,
+        placeHorizontally: (mode) ->
+            column.justifyContent = mode ?? column.justifyContent
     }

@@ -4,11 +4,12 @@ default_font = love.graphics.newFont(13)
 default_font::setFilter('nearest', 'nearest')
 
 return (options) ->
-    label = Element(options.master, options.x, options.y, options.width, options.height)
-    
+    label = Element(options)
+    label.type = 'label'
+
     style = label.style
     style.color = options.color or { 1, 1, 1 }
-    style.text = options.text
+    style.text = options.text ?? ''
     style.font = options.font or default_font
     style.width ??= style.font::getWidth(style.text)
     style.height ??= style.font::getHeight()

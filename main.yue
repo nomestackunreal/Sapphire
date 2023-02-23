@@ -1,60 +1,97 @@
-Column = require('Sapphire.Column')
-Rectangle = require('Sapphire.Rectangle')
-Label = require('Sapphire.Label')
-Button = require('Sapphire.Button')
 Center = require('Sapphire.Center')
+Column = require('Sapphire.Column')
+Input = require('Sapphire.Input')
+Button = require('Sapphire.Button')
+Rectangle = require('Sapphire.Rectangle')
 Margin = require('Sapphire.Margin')
-Image = require('Sapphire.Image')
+Label = require('Sapphire.Label')
 
-spotify_logo = love.graphics.newImage('Assets/spotify-logo.png')
-boldBigger = love.graphics.newFont('Assets/GothamBold.ttf', 30)
-bold = love.graphics.newFont('Assets/GothamBold.ttf', 24)
-medium = love.graphics.newFont('Assets/GothamMedium.ttf')
-
-global root = Center(
-    Column({
+global root = Center({
+    child: Column({
         background: {
             enabled: true,
             color: { 0.1, 0.1, 0.1 }
         },
         children: {
             Margin({
-                vertical: 15
-            }), -- Margin
-            Label({
-                text: 'Spotify',
-                font: bold,
-                width: 200,
-            }), -- Label
-            Label({
-                text: 'Login to continue',
-                font: boldBigger,
-                width: 400
-            }), -- Label
-            Rectangle(),
-            Rectangle(),
-            Margin({
-                vertical: 15
-            }), -- Margin
-            Button({
-                text: 'Login',
-                width: 200,
-                height: 50,
-                color: { 0, 0, 0 },
-                onReleased: =>
-                    root.child.append(Label({ text: 'hello' }))
+                vertical: 10
+            })
+            Column({
+                id: 'prompt',
                 background: {
                     enabled: true,
-                    color: { 1, 1, 1 },
-                    radius: 25
+                    color: { 0.2, 0.2, 0.2 }
+                },
+                children: {
+                    Input({
+                        id: 'input',
+                        text: '',
+                        width: 300,
+                        height: 50,
+                        color: { 1, 1, 1 },
+                        background: {
+                            enabled: true,
+                            color: { 0.3, 0.3, 0.3 }
+                        }
+                    }), -- Input
+                    Button({
+                        text: 'Add Item',
+                        width: 300,
+                        height: 50,
+                        color: { 0, 0, 0 },
+                        background: {
+                            enabled: true,
+                            color: { 1, 1, 1 }
+                        },
+                        onPressed: =>
+                            wrapper = root.child
+                            prompt = wrapper.getElementById('prompt')
+                            input = prompt.getElementById('input')
+                            itemList = wrapper.getElementById('itemlist')
+                            itemList.append(Label({
+                                id: 'item',
+                                text: input.value,
+                                width: 300,
+                                color: { 0, 0, 0 }
+                            })) -- Label
+                    }), -- Button
+                    Button({
+                        text: 'Clear Items',
+                        width: 300,
+                        height: 50,
+                        color: { 0, 0, 0 },
+                        background: {
+                            enabled: true,
+                            color: { 1, 1, 1 }
+                        },
+                        onPressed: =>
+                            wrapper = root.child
+                            itemList = wrapper.getElementById('itemlist')
+                            items = itemList.getElementsById('item')
+                            for item in *items
+                                itemList.remove(item)
+                    })
                 }
-            }), -- Label
+            }), -- Column
             Margin({
-                vertical: 15
+                vertical: 10
+            }), -- Margin
+            Column({
+                id: 'itemlist',
+                background: {
+                    enabled: true,
+                    color: { 1, 1, 1 }
+                },
+                width: 300,
+                height: 0,
+                children: {}
+            }), -- Column
+            Margin({
+                vertical: 10
             }) -- Margin
         }
     }) -- Column
-) -- Center
+}) -- Center
 
 love.draw = ->
     root.draw()
@@ -64,3 +101,6 @@ love.mousepressed = (x, y) ->
 
 love.mousereleased = ->
     root.onReleased()
+
+love.textinput = (t) ->
+    root.callfn('textInput', { t })

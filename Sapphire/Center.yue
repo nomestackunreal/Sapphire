@@ -1,31 +1,31 @@
-window_width, window_height = love.graphics.getDimensions()
+screenWidth, screenHeight = love.graphics.getDimensions()
 
-call = (function_name, ...) ->
-    if (function_name != nil)
-        return function_name(...)
+call = (functionName, ...) ->
+    if (functionName != nil)
+        return functionName(...)
 
-return (child, x=0, y=0, width=window_width, height=window_height) ->
+return (options) ->
     center = {}
 
-    center.x = x
-    center.y = y
-    center.width = width
-    center.height = height
-    center.child = child
-    center.child.master = center
+    center.positionMode = 'relative'
+    center.x = options.x ?? 0
+    center.y = options.y ?? 0
+    center.width = options.width ?? screenWidth
+    center.height = options.height ?? screenHeight
+    center.child = options.child
+
+    if center.child != nil then center.child.master = center
 
     align = ->
         if (center.child != nil)
             center.child.style.x = center.x + (center.width / 2) - center.child.style.width / 2
             center.child.style.y = center.y + (center.height / 2) - center.child.style.height / 2
-            call(center.child.align)
+            if (center.child.align != nil) then center.child.align()
 
     align()
 
     draw = ->
         center.child.draw()
-        -- love.graphics.setColor(1, 1, 1)
-        -- love.graphics.rectangle('line', center.x, center.y, center.width, center.height)
 
     onPressed = (x, y) ->
         center.child.onPressed(x, y)
@@ -33,13 +33,16 @@ return (child, x=0, y=0, width=window_width, height=window_height) ->
     onReleased = ->
         center.child.onReleased()
 
+    callfn = (functionName, args={}) ->
+        call(center.child[functionName], unpack args)
+
     return {
-        child: child,
+        child: options.child,
+        type: 'center',
         style: center,
         align: align,
         draw: draw,
         onPressed: onPressed,
         onReleased: onReleased,
-        position: (x, y) -> center.x, center.y = x, y
-        size: (width, height) -> center.width, center.height = width, height
+        callfn: callfn
     }

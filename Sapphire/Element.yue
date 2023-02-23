@@ -1,50 +1,18 @@
-return (master, x = 0, y = 0, width = 50, height = 50) ->
+return (options={}) ->
     element = {}
 
-    element.positionMode = 'relative'
-    element.master = master
-    element.x = 0
-    element.y = 0
-    element.width = width
-    element.height = height
-    element.alpha = 1
-    element.color = { 1, 1, 1 }
-    
-    absolute = ->
-        element.positionMode = 'absolute'
-
-    relative = ->
-        element.positionMode = 'relative'
-
-    size = (width, height) ->
-        element.width = width ?? element.width
-        element.height = height ?? element.height
-
-    position = (x, y) ->
-        element.x = x ?? element.x
-        element.y = y ?? element.y
-
-    paint = (color) ->
-        element.color = color ?? element.color
-    
-    opacity = (alpha) ->
-        element.alpha = alpha ?? element.alpha
-
-    match = (mode) ->
-        switch mode
-            when 'master-position'
-                element.x = element.master?.style.x ?? element.x
-                element.y = element.master?.style.y ?? element.y
-            when 'master-size'
-                element.width = element.master?.style.width ?? element.width
-                element.height = element.master?.style.height ?? element.height
+    element.master = options.master
+    element.id = options.id ?? ''
+    element.x = options.x ?? 0
+    element.y = options.y ?? 0
+    element.positionMode = options.position ?? 'relative'
+    element.width = options.width ?? 50
+    element.height = options.height ?? 50
+    element.alpha = options.alpha ?? 1
+    element.color = options.color ?? { 1, 1, 1 }
 
     return {
         style: element,
-        position: position,
-        size: size,
-        absolute: absolute,
-        relative: relative,
-        match: match,
-        paint: paint
+        id: element.id,
+        type: 'baseElement'
     }

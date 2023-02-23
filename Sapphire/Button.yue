@@ -5,6 +5,7 @@ overlap = (x, y, w, h, xx, yy, ww, hh) ->
 
 return (options) ->
     button = Label(options)
+    button.type = 'button'
 
     style = button.style
 
@@ -12,6 +13,7 @@ return (options) ->
     button.callback = {
         onclick: options.onPressed ?? (self) -> self
         onrelease: options.onReleased ?? (self) -> self
+        textinput: (self) -> self
     }
 
     button.onPressed = (x, y) ->

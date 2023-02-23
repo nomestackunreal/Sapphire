@@ -1,1 +1,24 @@
+Button = require('Sapphire.Button')
+
 return (options) ->
+    input = Button(options)
+
+    style = input.style
+    input.focused = false
+
+    input.callback.onclick = ->
+        input.focused = true
+
+    input.callback.textinput = (_, text) ->
+        if input.focused and text != nil then
+            style.text = style.text .. text
+
+    input.textInput = (text) ->
+        input.callback.textinput(input, text)
+
+    return setmetatable(input, {
+        __index: (index) =>
+            if (index == 'value') then return input.style.text
+            if (index == 'type') then return 'input'
+            return rawget(input, index)
+    })

@@ -1,11 +1,13 @@
 Element = require('Sapphire.Element')
 
 return (options) ->
-    image = Element(options.master, options.x, options.y, options.source::getWidth(), options.source::getHeight())
+    image = Element(options)
     
     style = image.style
 
     style.source = options.source
+    style.width = style.source::getWidth()
+    style.height = style.source::getHeight()
     style.scalex = options.scalex or options.scale or 1
     style.scaley = options.scaley or options.scale or 1
 

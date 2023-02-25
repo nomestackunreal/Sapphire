@@ -21,6 +21,7 @@ return (options={}) ->
     callback.onfocused = options.onFocused
     callback.onchanged = options.onChanged
     callback.onmissclick = options.onMissClick
+    callback.onsubmit = options.onSubmit
     callback.onkeypressed = options.keyPressed
 
     setEvent = (event, fn) ->

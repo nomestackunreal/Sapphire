@@ -1,18 +1,61 @@
+screenWidth, screenHeight = love.graphics.getDimensions()
+
 return (options={}) ->
+    style = {}
+
+    master = options.master
+
+    style.id = options.id ?? ''
+    style.x = options.x ?? 0
+    style.y = options.y ?? 0
+    style.positionMode = options.position ?? 'relative'
+    style.width = options.width ?? 50
+    style.height = options.height ?? 50
+    style.alpha = options.alpha ?? 1
+    style.color = options.color ?? { 1, 1, 1 }
+    style.cursor = options.cursor ?? 'ibeam'
+
+    callback = {}
+    callback.onclick = options.onPressed
+    callback.onrelease = options.onReleased
+    callback.onfocused = options.onFocused
+    callback.onchanged = options.onChanged
+    callback.onmissclick = options.onMissClick
+    callback.onkeypressed = options.keyPressed
+
+    setEvent = (event, fn) ->
+        callback[event] = fn
+
+    callEvent = (event, arguments={}) ->
+        if (callback[event] != nil)
+            callback[event](unpack arguments)
+
+    top = (margin=0) ->
+        y = master?.y ?? 0
+        style.y = y + margin
+
+    left = (margin=0) ->
+        x = master?.x ?? 0
+        style.x = x + margin
+
+    right = (margin=0) ->
+        x = (master?.x + master?.width - style.width) ?? screenWidth - style.width
+
+    bottom = (margin=0) ->
+        y = (master?.y + master?.height - style.height) ?? screenHeight - style.height
+
     element = {}
 
-    element.master = options.master
-    element.id = options.id ?? ''
-    element.x = options.x ?? 0
-    element.y = options.y ?? 0
-    element.positionMode = options.position ?? 'relative'
-    element.width = options.width ?? 50
-    element.height = options.height ?? 50
-    element.alpha = options.alpha ?? 1
-    element.color = options.color ?? { 1, 1, 1 }
+    element.master = master
+    element.id = style.id
+    element.style = style
+    element.type = 'baseElement'
+    element.callback = callback
+    element.setEvent = setEvent
+    element.callEvent = callEvent
+    element.top = top
+    element.left = left
+    element.right = right
+    element.bottom = bottom
 
-    return {
-        style: element,
-        id: element.id,
-        type: 'baseElement'
-    }
+    return element

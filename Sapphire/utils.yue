@@ -1,0 +1,17 @@
+export rgb = (red, green, blue) ->
+    return { red / 255, green / 255, blue / 255 }
+
+export rgba = (red, green, blue, alpha) ->
+    return { red / 255, green / 255, blue / 255, alpha / 255 }
+
+export hex = (hex, opacity) ->
+    return { tonumber(string.sub(hex, 2, 3), 16)/256, tonumber(string.sub(hex, 4, 5), 16)/256, tonumber(string.sub(hex, 6, 7), 16)/256, value or 1 }
+
+export setInterval = (time, callback) ->
+  coroutine.create(
+    ->
+      t = os.clock()
+      while os.clock() - t < time
+        coroutine.yield()
+      callback()
+  )

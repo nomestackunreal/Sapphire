@@ -4,9 +4,9 @@ An UI library for Love2D. (Inspired in Flutter)
 
 ## YueScript?
 
-I coded this library in YueScript, it's a language that compiles to Lua. But you can use the library in a YueScript project or a regular Lua project too.
+I coded this library in YueScript, it's a language that compiles to Lua. You can use this library in a YueScript project or a normal Lua project too
 
-The Lua files of the project will be at build/lua and the YueScript files will be at src/ folder
+The Lua files of this project will be at `build/lua` and the YueScript files will be at `src/` folder
 
 ## Example
 
@@ -30,8 +30,8 @@ love.draw = ->
 
 ## Status
 
-For now this project is just experimental and you shouldn't use it for big projects. I didn't bug check it yet. Any bug reports send it to 'Issues'
+For now this project is just experimental and you shouldn't use it for big projects. I didn't bug check it yet. If you find some bug you can send it to 'Issues'
 
 ## Documentation
 
-Still on progress. But there are some doc files in the project source.
+Still on progress.

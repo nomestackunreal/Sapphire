@@ -27,3 +27,27 @@ love.draw = ->
 
 This code will create a new instance of a Button.
 
+# Events
+
+Events are functions that are called when something specific happens, when an Element is clicked, or a key is pressed, or a input receives focus and etc... A event is fired.
+To begin with, let's say we have a button.
+```moonscript
+
+Button = require('Sapphire.Button')
+
+printTextButton = Button({
+    text: 'Print \'Hello, World!\'',
+    onPressed: =>
+        print('Hello, World!')
+})
+
+love.draw = ->
+    printTextButton.draw()
+
+love.mousepressed = (x, y) ->
+    printTextButton.onPressed(x, y)
+
+love.mousereleased = ->
+    printTextButton.onReleased()
+
+```

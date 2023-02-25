@@ -1,20 +1,57 @@
-Button = require('Sapphire.Button')
+PATH = (...)
+PATH = PATH::sub(1, #PATH-5)
+Button = require("#{PATH}.Button")
+TextStyle = require("#{PATH}.TextStyle")
+
+import 'utf8'
 
 return (options) ->
     input = Button(options)
+    input.type = 'input'
 
     style = input.style
+    style.cursor = 'ibeam'
+    
+    if (style.textStyle == nil)
+        style.textStyle = TextStyle({
+            color: style.color,
+            decoration: 'none'
+        })
+    else
+        style.textStyle.style.lineMode = 'none'
+
     input.focused = false
 
     input.callback.onclick = ->
         input.focused = true
+        style.textStyle.style.lineMode = 'line-onleft'
+        input.callEvent('onfocused', { input, input.focused })
 
     input.callback.textinput = (_, text) ->
         if input.focused and text != nil then
             style.text = style.text .. text
+            input.callEvent('onchanged', { input, style.text })
+
+    input.callback.onmissclick = ->
+        input.focused = false
+        style.textStyle.style.lineMode = 'none'
+        input.callEvent('onfocused', { input, input.focused })
+
+    input.callback.onkeypressed = (_, key) ->
+        if (key == 'backspace')
+            byteoffset = utf8.offset(style.text, -1)
+            if (byteoffset)
+                style.text = string.sub(style.text, 1, byteoffset - 1)
+        elseif (key == 'return')
+            input.focused = false
+            style.textStyle.style.lineMode = 'none'
+            input.callEvent('onfocused', { input, input.focused })
 
     input.textInput = (text) ->
-        input.callback.textinput(input, text)
+        input.callEvent('textinput', { input, text })
+
+    input.keyPressed = (key) ->
+        input.callEvent('onkeypressed', { input, key })
 
     return setmetatable(input, {
         __index: (index) =>

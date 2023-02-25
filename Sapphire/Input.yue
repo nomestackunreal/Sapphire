@@ -45,6 +45,7 @@ return (options) ->
         elseif (key == 'return')
             input.focused = false
             style.textStyle.style.lineMode = 'none'
+            input.callEvent('onsubmit', { input })
             input.callEvent('onfocused', { input, input.focused })
 
     input.textInput = (text) ->

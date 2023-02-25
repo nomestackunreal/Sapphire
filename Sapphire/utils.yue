@@ -13,5 +13,15 @@ export setInterval = (time, callback) ->
       t = os.clock()
       while os.clock() - t < time
         coroutine.yield()
-      callback()
+      return callback()
+  )
+
+export setLoopingInterval = (time, callback) ->
+  interval = setInterval(time, callback)
+  coroutine.create(
+    ->
+      while true
+        coroutine.resume(interval)
+        if (coroutine.status(interval) == 'dead') then interval = setInterval(time, callback)
+        coroutine.yield()
   )

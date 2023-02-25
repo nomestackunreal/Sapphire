@@ -1,0 +1,5 @@
+export Array = (...) ->
+  values = {...}
+
+  map = (fn) ->
+    [ fn(value) for value in *values ]

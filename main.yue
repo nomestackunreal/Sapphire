@@ -1,29 +1,43 @@
 import 'Sapphire'
 Sapphire.toGlobalScope()
 
-import rgb, setInterval from Sapphire.utils
+import rgb, setLoopingInterval from Sapphire.utils
 import insert from table
 
 { resume: await } = coroutine
 
 -- appName: Countdown Timer
 
+formatTime = (seconds) ->
+  seconds = tonumber seconds
+  if (seconds <= 0) then return '00:00'
+  hours = string.format('%02.f', math.floor(seconds/3600))
+  minutes = string.format('%02.f', math.floor(seconds/60 - (hours * 60)))
+  secs = string.format('%02.f', math.floor(seconds - hours*3600 - minutes*60))
+  return "#{minutes}:#{secs}"
+
 intervals = {}
-timerValue = 1000
+timerValue = 60
 
 global root = Center({
   child: Column({
     background: BackgroundDecoration({
-      color: { 1, 1, 1 }
+      padding: 30
+      borderRadius: 10
+      color: { 0.9, 0.9, 0.9 }
     }), -- BackgroundDecoration
     children: {
-      Label({
+      Input({
         id: 'timer-text',
-        text: '10:00',
+        text: formatTime(timerValue),
+        onSubmit: =>
+          timerValue = self.value
+          print('submit', timerValue)
+          self.style.text = formatTime(timerValue)
         textStyle: TextStyle({
           color: { 0, 0, 0 }
         }) -- TextStyle
-      }) -- Label
+      }) -- Input
       Row({
         children: {
           Button({
@@ -31,22 +45,34 @@ global root = Center({
             width: 150,
             textStyle: TextStyle({}),
             background: BackgroundDecoration({
-              color: rgb(144, 238, 144)
+              color: rgb(144, 238, 144),
+              borderRadius: 10
             }), -- BackgroundDecoration
             onPressed: () =>
               self.style.background.style.alpha = 0.8
             onReleased: () =>
               self.style.background.style.alpha = 1
-              insert(intervals, setInterval(1, () ->
-                root.child.getElementById('timer-text').style.text = '9:59'
-              ))
+              intervals.timer = setLoopingInterval(1, () ->
+                print(timerValue)
+                if (intervals.timer != nil)
+                  timerValue -= 1
+                  root.child.getElementById('timer-text').style.text = formatTime(timerValue)
+                  if (timerValue <= 0) then intervals.timer = nil
+              )
           }) -- Button
+          Margin({ horizontal: 20 })
           Button({
             text: 'Stop',
             width: 150,
             background: BackgroundDecoration({
-              color: rgb(240, 128, 128)
+              color: rgb(240, 128, 128),
+              borderRadius: 10
             }), -- BackgroundDecoration
+            onPressed: () =>
+              self.style.background.style.alpha = 0.8
+            onReleased: () =>
+              self.style.background.style.alpha = 1
+              intervals.timer = nil
           }) -- Button
         }
       }) -- Row
@@ -55,7 +81,7 @@ global root = Center({
 }) -- Center
 
 love.draw = ->
-  for i in *intervals do await(i)
+  for name, interval in pairs intervals do await(interval)
   root.draw()
 
 love.mousepressed = (x, y) ->
@@ -63,3 +89,9 @@ love.mousepressed = (x, y) ->
 
 love.mousereleased = ->
   root.onReleased()
+
+love.textinput = (t) ->
+  root.callfn('textInput', { t })
+
+love.keypressed = (key) ->
+  root.callfn('keyPressed', { key })

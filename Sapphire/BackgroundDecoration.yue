@@ -1,0 +1,36 @@
+return (options={}) ->
+    style = {}
+
+    style.enabled = options.enabled ?? true
+    style.radius = options.radius ?? 0
+    style.color = options.color ?? { 1, 1, 1 }
+    style.alpha = options.alpha ?? 1
+    style.padding = options.padding
+    style.paddingHorizontal = options.paddingHorizontal ?? 0
+    style.paddingVertical = options.paddingVertical ?? 0
+    style.borderRadius = options.borderRadius ?? 0
+    style.border = 2
+
+    draw = (x, y, width, height, opt={}) ->
+        opt.drawborder ??= false
+        x -= (style.padding or style.paddingHorizontal)
+        y -= (style.padding or style.paddingVertical)
+        width += (style.padding or style.paddingHorizontal) * 2
+        height += (style.padding or style.paddingVertical) * 2
+        love.graphics.setColor(style.color[1], style.color[2], style.color[3], style.alpha)
+        love.graphics.rectangle('fill', x, y, width, height, style.borderRadius)
+        
+        if (opt.drawborder)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.setLineWidth(style.border)
+            love.graphics.rectangle('line', x, y, width, height, style.borderRadius, style.borderRadius)
+
+    return setmetatable({
+        __index: style
+        style: style
+        draw: draw
+        type: 'backgroundDecoration'
+        id: options.id ?? ''
+    }, {
+        __index: style
+    })

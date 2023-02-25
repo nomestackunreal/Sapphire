@@ -1,0 +1,40 @@
+defaultFont = love.graphics.newFont(13)
+defaultFont::setFilter('nearest', 'nearest')
+
+return (options={}) ->
+    style = {}
+
+    style.lineMode = options.decoration ?? 'none'
+    style.lineHeight = options.lineHeight ?? 1
+    style.color = options.color ?? { 1, 1, 1 }
+    style.lineColor = options.lineColor ?? style.color
+    style.font = options.font ?? defaultFont
+    style.alpha = options.alpha ?? 1
+    style.translateX = options.translateX ?? 0
+    style.translateY = options.translateY ?? 0
+
+    draw = (text, x, y) ->
+        width = style.font::getWidth(text)
+        height = style.font::getHeight()
+
+        love.graphics.setFont(style.font)
+        love.graphics.setColor(style.color[1], style.color[2], style.color[3], style.alpha)
+        love.graphics.print(text, x + style.translateX, y + style.translateY)
+
+        love.graphics.setColor(unpack style.lineColor)
+        switch (style.lineMode)
+            when 'underline'
+                love.graphics.rectangle('fill', x, y + height, width, style.lineHeight)
+            when 'line-through'
+                love.graphics.rectangle('fill', x, y + (height / 2) - style.lineHeight / 2, width, style.lineHeight)
+            when 'overline'
+                love.graphics.rectangle('fill', x, y - style.lineHeight, width, style.lineHeight)
+            when 'line-onleft'
+                love.graphics.rectangle('fill', x + width, y, style.lineHeight, height)
+
+    return {
+        id: options.id ?? '',
+        type: 'textStyle',
+        style: style,
+        draw: draw
+    }

@@ -1,0 +1,150 @@
+screenWidth, screenHeight = love.graphics.getDimensions()
+
+collides = (x, y, w, h, xx, yy, ww, hh) ->
+    x <= xx + ww and x + w >= xx and y <= yy + hh and y + h >= yy
+
+sysCursor = love.mouse.getSystemCursor
+
+return (options={}) ->
+    row = {}
+
+    row.master = options.master
+    row.type = 'row'
+    row.elements = {}
+    row.id = options.id ?? ''
+    row.positionMode = options.position ?? 'relative'
+    row.x = options.x ?? 0
+    row.y = options.y ?? 0
+    row.width = options.width ?? windowWidth
+    row.height = options.height ?? windowHeight
+    row.spacing = options.spacing ?? 0
+    row.justifyContent = options.justifyContent ?? 'center'
+    row.background = options.background
+    row.cursor = sysCursor(options.cursor ?? 'arrow')
+
+    call = (functionName, arguments={}) ->
+        for element in *row.elements
+            if (element != nil)
+                if (element[functionName] != nil)
+                    element[functionName](unpack arguments)
+
+    draw = ->
+        if (row.background != nil and row.background.type == 'backgroundDecoration')
+            row.background.draw(row.x, row.y, row.width, row.height)
+        mx, my = love.mouse.getPosition()
+        if (collides(row.x, row.y, row.width, row.height, mx, my, 1, 1))
+            if love.mouse.getCursor() != row.cursor
+                love.mouse.setCursor(row.cursor)
+        call('draw')
+
+    onPressed = (x, y) ->
+        call('onPressed', { x, y })
+
+    onReleased = ->
+        call('onReleased')
+
+    textInput = (t) ->
+        call('textInput', { t })
+
+    fixsize = ->
+        width = 0
+        for element in *row.elements
+            width += element.style.width
+        row.width = width
+
+        height = 0
+        for element in *row.elements
+            if element.style.height > height
+                height = element.style.height
+        row.height = height
+
+    justify = ->
+        switch row.justifyContent
+            when 'center'
+                for element in *row.elements
+                    if element.style.positionMode == 'relative'
+                        element.style.y = row.y + (row.height / 2) - element.style.height / 2
+                        if (element.align != nil) then element.align()
+            when 'up'
+                for element in *row.elements
+                    if element.style.positionMode == 'relative'
+                        element.style.y = row.y
+                        if (element.align != nil) then element.align()
+            when 'down'
+                for element in *row.elements
+                    if element.style.positionMode == 'relative'
+                        element.style.y = (row.y + row.height) - element.style.height
+                        if (element.align != nil) then element.align()
+
+    align = ->
+        x = row.x
+        for element in *row.elements
+            if (element.style.positionMode == 'relative')
+                element.style.x = x
+                x += element.style.width + row.spacing
+        justify()
+        if (row.master != nil)
+            row.master.align?()
+
+
+    rawAppend = (element) ->
+        row.elements[] = element
+        element.master = row
+        fixsize()
+
+    append = (element) ->
+        rawAppend(element)
+        align()
+
+    if (options.children != nil)
+        for child in *options.children
+            append(child)
+
+    return {
+        style: row,
+        master: row.master,
+        elements: row.elements,
+        id: row.id,
+        append: append,
+        rawAppend: rawAppend,
+        align: align,
+        call: call,
+        draw: draw,
+        background: background,
+        remove: (element) ->
+            for index, test in ipairs row.elements
+                if (test == element)
+                    table.remove(row.elements, index)
+            fixsize()
+            align()
+        getElementById: (id) ->
+            for element in *row.elements
+                if (element.id == id)
+                    return element
+        getElementByType: (type) ->
+            for element in *row.elements
+                if (element.type == type)
+                    return element
+        getElementsById: (id) ->
+            elements = {}
+            for element in *row.elements
+                if (element.id == id)
+                    elements[] = element
+            return elements
+        getElementsByType: (type) ->
+            elements = {}
+            for element in *row.elements
+                if (element.type == type)
+                    elements[] = element
+            return elements
+        setMaster: ->
+            for element in *row.elements
+                element.master = row
+        onPressed: onPressed,
+        onReleased: onReleased,
+        textInput: textInput,
+        keyPressed: (key) ->
+            call('keyPressed', { key })
+        placeHorizontally: (mode) ->
+            row.justifyContent = mode ?? row.justifyContent
+    }

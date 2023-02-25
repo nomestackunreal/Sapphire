@@ -1,4 +1,6 @@
-Element = require('Sapphire.Element')
+PATH = (...)
+PATH = PATH::sub(1, #PATH-#"Rectangle")
+Element = require("#{PATH}.Element")
 
 return (master, x=0, y=0, width=50, height=50) ->
     rectangle = Element(options)

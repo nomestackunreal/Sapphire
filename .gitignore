@@ -2,3 +2,4 @@
 *.lua
 conf.yue
 main.yue
+global.css

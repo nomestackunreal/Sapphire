@@ -1,0 +1,23 @@
+PATH = (...) .. '.'
+
+UIX = {
+    Button: require("#{PATH}Button"),
+    Center: require("#{PATH}Center"),
+    Column: require("#{PATH}Column"),
+    Element: require("#{PATH}Element"),
+    Image: require("#{PATH}Image"),
+    Input: require("#{PATH}Input"),
+    Label: require("#{PATH}Label"),
+    Margin: require("#{PATH}Margin"),
+    Rectangle: require("#{PATH}Rectangle"),
+    Row: require("#{PATH}Row"),
+    BackgroundDecoration: require("#{PATH}BackgroundDecoration"),
+    TextStyle: require("#{PATH}TextStyle")
+}
+
+return {
+    UIX: UIX,
+    utils: require("#{PATH}utils"),
+    toGlobalScope: ->
+        for name, component in pairs(UIX) do _G[name] = component
+}

@@ -1,7 +1,10 @@
-Element = require('Sapphire.Element')
+PATH = (...)
+PATH = PATH::sub(1, #PATH-5)
+Element = require("#{PATH}.Element")
 
 return (options) ->
     image = Element(options)
+    image.type = 'image'
     
     style = image.style
 

@@ -1,106 +1,65 @@
-Center = require('Sapphire.Center')
-Column = require('Sapphire.Column')
-Input = require('Sapphire.Input')
-Button = require('Sapphire.Button')
-Rectangle = require('Sapphire.Rectangle')
-Margin = require('Sapphire.Margin')
-Label = require('Sapphire.Label')
+import 'Sapphire'
+Sapphire.toGlobalScope()
+
+import rgb, setInterval from Sapphire.utils
+import insert from table
+
+{ resume: await } = coroutine
+
+-- appName: Countdown Timer
+
+intervals = {}
+timerValue = 1000
 
 global root = Center({
-    child: Column({
-        background: {
-            enabled: true,
-            color: { 0.1, 0.1, 0.1 }
-        },
+  child: Column({
+    background: BackgroundDecoration({
+      color: { 1, 1, 1 }
+    }), -- BackgroundDecoration
+    children: {
+      Label({
+        id: 'timer-text',
+        text: '10:00',
+        textStyle: TextStyle({
+          color: { 0, 0, 0 }
+        }) -- TextStyle
+      }) -- Label
+      Row({
         children: {
-            Margin({
-                vertical: 10
-            })
-            Column({
-                id: 'prompt',
-                background: {
-                    enabled: true,
-                    color: { 0.2, 0.2, 0.2 }
-                },
-                children: {
-                    Input({
-                        id: 'input',
-                        text: '',
-                        width: 300,
-                        height: 50,
-                        color: { 1, 1, 1 },
-                        background: {
-                            enabled: true,
-                            color: { 0.3, 0.3, 0.3 }
-                        }
-                    }), -- Input
-                    Button({
-                        text: 'Add Item',
-                        width: 300,
-                        height: 50,
-                        color: { 0, 0, 0 },
-                        background: {
-                            enabled: true,
-                            color: { 1, 1, 1 }
-                        },
-                        onPressed: =>
-                            wrapper = root.child
-                            prompt = wrapper.getElementById('prompt')
-                            input = prompt.getElementById('input')
-                            itemList = wrapper.getElementById('itemlist')
-                            itemList.append(Label({
-                                id: 'item',
-                                text: input.value,
-                                width: 300,
-                                color: { 0, 0, 0 }
-                            })) -- Label
-                    }), -- Button
-                    Button({
-                        text: 'Clear Items',
-                        width: 300,
-                        height: 50,
-                        color: { 0, 0, 0 },
-                        background: {
-                            enabled: true,
-                            color: { 1, 1, 1 }
-                        },
-                        onPressed: =>
-                            wrapper = root.child
-                            itemList = wrapper.getElementById('itemlist')
-                            items = itemList.getElementsById('item')
-                            for item in *items
-                                itemList.remove(item)
-                    })
-                }
-            }), -- Column
-            Margin({
-                vertical: 10
-            }), -- Margin
-            Column({
-                id: 'itemlist',
-                background: {
-                    enabled: true,
-                    color: { 1, 1, 1 }
-                },
-                width: 300,
-                height: 0,
-                children: {}
-            }), -- Column
-            Margin({
-                vertical: 10
-            }) -- Margin
+          Button({
+            text: 'Start',
+            width: 150,
+            textStyle: TextStyle({}),
+            background: BackgroundDecoration({
+              color: rgb(144, 238, 144)
+            }), -- BackgroundDecoration
+            onPressed: () =>
+              self.style.background.style.alpha = 0.8
+            onReleased: () =>
+              self.style.background.style.alpha = 1
+              insert(intervals, setInterval(1, () ->
+                root.child.getElementById('timer-text').style.text = '9:59'
+              ))
+          }) -- Button
+          Button({
+            text: 'Stop',
+            width: 150,
+            background: BackgroundDecoration({
+              color: rgb(240, 128, 128)
+            }), -- BackgroundDecoration
+          }) -- Button
         }
-    }) -- Column
+      }) -- Row
+    }
+  }) -- Column
 }) -- Center
 
 love.draw = ->
-    root.draw()
+  for i in *intervals do await(i)
+  root.draw()
 
 love.mousepressed = (x, y) ->
-    root.onPressed(x, y)
+  root.onPressed(x, y)
 
 love.mousereleased = ->
-    root.onReleased()
-
-love.textinput = (t) ->
-    root.callfn('textInput', { t })
+  root.onReleased()

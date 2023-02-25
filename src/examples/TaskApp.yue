@@ -1,0 +1,139 @@
+import 'Sapphire'
+Sapphire.toGlobalScope()
+
+import rgb from Sapphire.utils
+
+Item = (props) ->
+    { input: input } = props
+
+    return Row({
+        id: 'item'
+        background: {
+            alpha: 0
+        }
+        children: {
+            Label({
+                text: input.value,
+                width: 250,
+                color: { 0, 0, 0 },
+                background: BackgroundDecoration({
+                    color: { 1, 1, 1 }
+                    radius: 10
+                })
+            }),
+            Button({
+                id: 'remove',
+                text: 'Done',
+                width: 50,
+                color: { 0, 0, 0 },
+                background: BackgroundDecoration({
+                    color: rgb(144, 238, 144),
+                    radius: 10,
+                    alpha: 0.9
+                }),
+                onPressed: =>
+                    self.style.background.style.alpha = 1
+            })
+        }
+    })
+
+global root = Center({
+    child: Column({
+        background: BackgroundDecoration({
+            color: { 0.1, 0.1, 0.1 },
+            paddingHorizontal: 30,
+            paddingVertical: 20,
+            borderRadius: 10
+        }) -- BackgroundDecoration
+        children: {
+            Margin({
+                vertical: 10
+            }) -- Margin
+            Column({
+                id: 'prompt',
+                background: BackgroundDecoration({
+                    color: { 0.2, 0.2, 0.2 },
+                    padding: 10
+                }) -- BackgroundDecoration
+                children: {
+                    Input({
+                        id: 'input',
+                        width: 300,
+                        height: 50,
+                        color: { 1, 1, 1 },
+                        background: BackgroundDecoration({ color: { 0.3, 0.3, 0.3 } })
+                    }), -- Input
+                    Button({
+                        text: 'Add Item',
+                        width: 300,
+                        height: 50,
+                        color: { 0, 0, 0 },
+                        background: BackgroundDecoration({ color: { 1, 1, 1 } })
+                        onPressed: =>
+                            self.style.color = { 0.5, 0.5, 0.5 }
+                        onReleased: =>
+                            self.style.color = { 0, 0, 0 }
+                            wrapper = root.child
+                            prompt = wrapper.getElementById('prompt')
+                            input = prompt.getElementById('input')
+                            itemList = wrapper.getElementById('itemlist')
+                            if (input.value != '')
+                                row = Item({
+                                    input: input
+                                })
+
+                                button = row.getElementById('remove')
+                                button.master = row
+
+                                button.setEvent('onrelease', () => itemList.remove(self.master))
+
+                                itemList.append(row)
+                                input.style.text = ''
+                    }), -- Button
+                    Button({
+                        text: 'Clear Items',
+                        width: 300,
+                        height: 50,
+                        color: { 0, 0, 0 },
+                        background: BackgroundDecoration({ color: { 1, 1, 1 } })
+                        onPressed: =>
+                            self.style.color = { 0.5, 0.5, 0.5 }
+                        onReleased: =>
+                            self.style.color = { 0, 0, 0 }
+                            wrapper = root.child
+                            itemList = wrapper.getElementById('itemlist')
+                            items = itemList.getElementsById('item')
+                            for item in *items
+                                itemList.remove(item)
+                    }) -- Button
+                }
+            }), -- Column
+            Margin({
+                vertical: 10
+            }), -- Margin
+            Column({
+                id: 'itemlist',
+                width: 300,
+                height: 0
+            }), -- Column
+            Margin({
+                vertical: 10
+            }) -- Margin
+        }
+    }) -- Column
+}) -- Center
+
+love.draw = ->
+    root.draw()
+
+love.mousepressed = (x, y) ->
+    root.onPressed(x, y)
+
+love.mousereleased = ->
+    root.onReleased()
+
+love.textinput = (t) ->
+    root.callfn('textInput', { t })
+
+love.keypressed = (key) ->
+    root.callfn('keyPressed', { key })

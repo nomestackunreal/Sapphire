@@ -1,8 +1,14 @@
 screenWidth, screenHeight = love.graphics.getDimensions()
 
+collides = (x, y, w, h, xx, yy, ww, hh) ->
+    x <= xx + ww and x + w >= xx and y <= yy + hh and y + h >= yy
+
+sysCursor = love.mouse.getSystemCursor
+
 return (options={}) ->
     column = {}
 
+    column.master = options.master
     column.type = 'column'
     column.elements = {}
     column.id = options.id ?? ''
@@ -13,22 +19,22 @@ return (options={}) ->
     column.height = options.height ?? windowHeight
     column.spacing = options.spacing ?? 0
     column.justifyContent = options.justifyContent ?? 'center'
-    column.background = options.background ?? {
-        enabled: false,
-        color: { 0, 0, 0 }
-    }
+    column.background = options.background
+    column.cursor = sysCursor(options.cursor ?? 'arrow')
 
     call = (functionName, arguments={}) ->
         for element in *column.elements
-            if (element[functionName] != nil)
-                element[functionName](unpack arguments)
-        -- love.graphics.setColor(1, 0, 0)
-        -- love.graphics.rectangle('line', column.x, column.y, column.width, column.height)
+            if (element != nil)
+                if (element[functionName] != nil)
+                    element[functionName](unpack arguments)
 
     draw = ->
-        if column.background.enabled
-            love.graphics.setColor(unpack column.background.color)
-            love.graphics.rectangle('fill', column.x, column.y, column.width, column.height)
+        if (column.background != nil and column.background.type == 'backgroundDecoration')
+            column.background.draw(column.x, column.y, column.width, column.height)
+        mx, my = love.mouse.getPosition()
+        if (collides(column.x, column.y, column.width, column.height, mx, my, 1, 1))
+            if love.mouse.getCursor() != column.cursor
+                love.mouse.setCursor(column.cursor)
         call('draw')
 
     onPressed = (x, y) ->
@@ -39,6 +45,18 @@ return (options={}) ->
 
     textInput = (t) ->
         call('textInput', { t })
+
+    fixsize = ->
+        height = 0
+        for element in *column.elements
+            height += element.style.height
+        column.height = height
+
+        width = 0
+        for element in *column.elements
+            if element.style.width > width
+                width = element.style.width
+        column.width = width
 
     justify = ->
         switch column.justifyContent
@@ -65,22 +83,12 @@ return (options={}) ->
                 element.style.y = y
                 y += element.style.height + column.spacing
         justify()
-
-    fixsize = ->
-        height = 0
-        for element in *column.elements
-            height += element.style.height
-        column.height = height
-
-        width = 0
-        for element in *column.elements
-            if element.style.width > width
-                width = element.style.width
-        column.width = width
+        if (column.master != nil)
+            column.master.align?()
 
 
     rawAppend = (element) ->
-        column.elements[] = element
+        table.insert(column.elements, element)
         element.master = column
         fixsize()
 
@@ -88,11 +96,14 @@ return (options={}) ->
         rawAppend(element)
         align()
 
-    for child in *options.children
-        append(child)
+    if (options.children != nil)
+        for child in *options.children
+            append(child)
 
     return {
         style: column,
+        master: column.master,
+        elements: column.elements,
         id: column.id,
         append: append,
         rawAppend: rawAppend,
@@ -126,9 +137,14 @@ return (options={}) ->
                 if (element.type == type)
                     elements[] = element
             return elements
+        setMaster: ->
+            for element in *column.elements
+                element.master = column
         onPressed: onPressed,
         onReleased: onReleased,
         textInput: textInput,
+        keyPressed: (key) ->
+            call('keyPressed', { key })
         placeHorizontally: (mode) ->
             column.justifyContent = mode ?? column.justifyContent
     }

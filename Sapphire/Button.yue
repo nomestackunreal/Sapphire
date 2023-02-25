@@ -1,4 +1,6 @@
-Label = require('Sapphire.Label')
+PATH = (...)
+PATH = PATH::sub(1, #PATH-#"Button")
+Label = require("#{PATH}.Label")
 
 overlap = (x, y, w, h, xx, yy, ww, hh) ->
     x <= xx + ww and x + w >= xx and y <= yy + hh and y + h >= yy
@@ -8,30 +10,20 @@ return (options) ->
     button.type = 'button'
 
     style = button.style
+    style.cursor = 'hand'
 
     button.clicked = false
-    button.callback = {
-        onclick: options.onPressed ?? (self) -> self
-        onrelease: options.onReleased ?? (self) -> self
-        textinput: (self) -> self
-    }
 
     button.onPressed = (x, y) ->
-        if overlap(x, y, 1, 1, style.x, style.y, style.width, style.height) and not button.clicked
+        if (overlap(x, y, 1, 1, style.x, style.y, style.width, style.height) and not button.clicked)
             button.clicked = true
-            button.callback.onclick(button)
-            style.color = { 1, 0, 0 }
+            button.callEvent('onclick', { button })
+        else
+            button.callEvent('onmissclick', { button })
 
     button.onReleased = ->
-        if button.clicked
+        if (button.clicked)
             button.clicked = false
-            button.callback.onrelease(button)
-            style.color = { 0.1, 0.1, 0.1 }
-
-    button.click = (callback) ->
-        button.callback.onclick = callback
-
-    button.release = (callback) ->
-        button.callback.onrelease = callback
+            button.callEvent('onrelease', { button })
 
     return button

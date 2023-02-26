@@ -6,7 +6,7 @@ An UI library for Love2D. (Inspired in Flutter)
 
 I coded this library in YueScript, it's a language that compiles to Lua. You can use this library in a YueScript project or a normal Lua project too
 
-The Lua files of this project will be at `build/` directory and the YueScript files will be at `src/` folder
+The Lua files of this project will be at `build/` directory *(currently non-existent)* and the YueScript files will be at `src/` folder 
 
 ## Example
 

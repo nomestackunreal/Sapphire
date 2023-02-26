@@ -13,6 +13,7 @@ UIX = {
     Row: require("#{PATH}Row"),
     BackgroundDecoration: require("#{PATH}BackgroundDecoration"),
     TextStyle: require("#{PATH}TextStyle")
+    Colors: require("#{PATH}Colors")
 }
 
 return {

@@ -15,8 +15,8 @@ return (options={}) ->
     column.positionMode = options.position ?? 'relative'
     column.x = options.x ?? 0
     column.y = options.y ?? 0
-    column.width = options.width ?? windowWidth
-    column.height = options.height ?? windowHeight
+    column.width = options.width ?? screenWidth
+    column.height = options.height ?? screenHeight
     column.spacing = options.spacing ?? 0
     column.justifyContent = options.justifyContent ?? 'center'
     column.background = options.background
@@ -49,29 +49,32 @@ return (options={}) ->
     fixsize = ->
         height = 0
         for element in *column.elements
-            height += element.style.height
+            height += element.style.height ?? 0
         column.height = height
 
         width = 0
         for element in *column.elements
-            if element.style.width > width
-                width = element.style.width
+            if ((element.style.width ?? 0) > width)
+                width = element.style.width ?? 0
         column.width = width
 
     justify = ->
         switch column.justifyContent
             when 'center'
                 for element in *column.elements
+                    element.style.width ??= 0
                     if element.style.positionMode == 'relative'
                         element.style.x = column.x + (column.width / 2) - element.style.width / 2
                         if (element.align != nil) then element.align()
             when 'left'
                 for element in *column.elements
+                    element.style.width ??= 0
                     if element.style.positionMode == 'relative'
                         element.style.x = column.x
                         if (element.align != nil) then element.align()
             when 'right'
                 for element in *column.elements
+                    element.style.width ??= 0
                     if element.style.positionMode == 'relative'
                         element.style.x = (column.x + column.width) - element.style.width
                         if (element.align != nil) then element.align()
@@ -81,7 +84,7 @@ return (options={}) ->
         for element in *column.elements
             if (element.style.positionMode == 'relative')
                 element.style.y = y
-                y += element.style.height + column.spacing
+                y += (element.style.height ?? 0) + column.spacing
         justify()
         if (column.master != nil)
             column.master.align?()

@@ -49,29 +49,32 @@ return (options={}) ->
     fixsize = ->
         width = 0
         for element in *row.elements
-            width += element.style.width
+            width += element.style.width ?? 0
         row.width = width
 
         height = 0
         for element in *row.elements
-            if element.style.height > height
-                height = element.style.height
+            if ((element.style.height ?? 0) > height)
+                height = element.style.height ?? 0
         row.height = height
 
     justify = ->
         switch row.justifyContent
             when 'center'
                 for element in *row.elements
+                    element.style.height ??= 0
                     if element.style.positionMode == 'relative'
                         element.style.y = row.y + (row.height / 2) - element.style.height / 2
                         if (element.align != nil) then element.align()
             when 'up'
                 for element in *row.elements
+                    element.style.height ??= 0
                     if element.style.positionMode == 'relative'
                         element.style.y = row.y
                         if (element.align != nil) then element.align()
             when 'down'
                 for element in *row.elements
+                    element.style.height ??= 0
                     if element.style.positionMode == 'relative'
                         element.style.y = (row.y + row.height) - element.style.height
                         if (element.align != nil) then element.align()
@@ -81,7 +84,7 @@ return (options={}) ->
         for element in *row.elements
             if (element.style.positionMode == 'relative')
                 element.style.x = x
-                x += element.style.width + row.spacing
+                x += (element.style.width ?? 0) + row.spacing
         justify()
         if (row.master != nil)
             row.master.align?()

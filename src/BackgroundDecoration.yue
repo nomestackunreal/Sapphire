@@ -1,0 +1,48 @@
+return (options={}) ->
+    style = {}
+
+    style.enabled = options.enabled ?? true
+    style.radius = options.radius ?? 0
+    style.color = options.color ?? { 1, 1, 1 }
+    style.alpha = options.alpha ?? 1
+    style.padding = options.padding
+    style.paddingHorizontal = options.paddingHorizontal ?? 0
+    style.paddingVertical = options.paddingVertical ?? 0
+    style.innerPadding = options.innerPadding
+    style.innerPaddingHorizontal = options.innerPaddingHorizontal ?? 0
+    style.innerPaddingVertical = options.innerPaddingVertical ?? 0
+    style.usePadding = options.usePadding ?? 'normal-padding'
+    style.borderRadius = options.borderRadius ?? 0
+    style.borderColor = options.borderColor ?? { 1, 1, 1 }
+    style.border = options.border ?? 2
+    style.borderAlpha = options.borderAlpha ?? 1
+
+    draw = (x, y, width, height, opt={}) ->
+        opt.drawborder ??= false
+        if (style.usePadding == 'normal-padding')
+            x -= (style.padding or style.paddingHorizontal)
+            y -= (style.padding or style.paddingVertical)
+            width += (style.padding or style.paddingHorizontal) * 2
+            height += (style.padding or style.paddingVertical) * 2
+        elseif (style.usePadding == 'inner-padding')
+            x += (style.innerPadding or style.innerPaddingHorizontal)
+            y += (style.innerPadding or style.innerPaddingVertical)
+            width -= (style.innerPadding or style.innerPaddingHorizontal) * 2
+            height -= (style.innerPadding or style.innerPaddingVertical) * 2
+        love.graphics.setColor(style.color[1], style.color[2], style.color[3], style.alpha)
+        love.graphics.rectangle('fill', x, y, width, height, style.borderRadius)
+        
+        if (opt.drawborder)
+            love.graphics.setColor(style.borderColor[1], style.borderColor[2], style.borderColor[3], style.borderAlpha)
+            love.graphics.setLineWidth(style.border)
+            love.graphics.rectangle('line', x, y, width, height, style.borderRadius, style.borderRadius)
+
+    return setmetatable({
+        __index: style
+        style: style
+        draw: draw
+        type: 'backgroundDecoration'
+        id: options.id ?? ''
+    }, {
+        __index: style
+    })

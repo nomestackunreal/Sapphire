@@ -1,97 +1,149 @@
 import 'Sapphire'
 Sapphire.toGlobalScope()
 
-import rgb, setLoopingInterval from Sapphire.utils
-import insert from table
+import 'modules.tween'
+import 'socket.http'
 
-{ resume: await } = coroutine
+screenWidth, screenHeight = love.graphics.getDimensions()
+animationList = {}
 
--- appName: Countdown Timer
+love.keyboard.setKeyRepeat(true)
 
-formatTime = (seconds) ->
-  seconds = tonumber seconds
-  if (seconds <= 0) then return '00:00'
-  hours = string.format('%02.f', math.floor(seconds/3600))
-  minutes = string.format('%02.f', math.floor(seconds/60 - (hours * 60)))
-  secs = string.format('%02.f', math.floor(seconds - hours*3600 - minutes*60))
-  return "#{minutes}:#{secs}"
+remove = (object, value) ->
+  for index, test in ipairs object
+    if (test == value)
+      object[index] = nil
+      return true
+  return false
 
-intervals = {}
-timerValue = 60
+Task = (props) ->
+  taskColor = { 0.05, 0.05, 0.05 }
 
-global root = Center({
-  child: Column({
-    background: BackgroundDecoration({
-      padding: 30
-      borderRadius: 10
-      color: { 0.9, 0.9, 0.9 }
-    }), -- BackgroundDecoration
+  { input: input } = props
+
+  return Row({
+    id: 'task',
     children: {
-      Input({
-        id: 'timer-text',
-        text: formatTime(timerValue),
-        onSubmit: =>
-          timerValue = self.value
-          print('submit', timerValue)
-          self.style.text = formatTime(timerValue)
-        textStyle: TextStyle({
-          color: { 0, 0, 0 }
-        }) -- TextStyle
-      }) -- Input
-      Row({
-        children: {
-          Button({
-            text: 'Start',
-            width: 150,
-            textStyle: TextStyle({}),
-            background: BackgroundDecoration({
-              color: rgb(144, 238, 144),
-              borderRadius: 10
-            }), -- BackgroundDecoration
-            onPressed: () =>
-              self.style.background.style.alpha = 0.8
-            onReleased: () =>
-              self.style.background.style.alpha = 1
-              intervals.timer = setLoopingInterval(1, () ->
-                print(timerValue)
-                if (intervals.timer != nil)
-                  timerValue -= 1
-                  root.child.getElementById('timer-text').style.text = formatTime(timerValue)
-                  if (timerValue <= 0) then intervals.timer = nil
-              )
-          }) -- Button
-          Margin({ horizontal: 20 })
-          Button({
-            text: 'Stop',
-            width: 150,
-            background: BackgroundDecoration({
-              color: rgb(240, 128, 128),
-              borderRadius: 10
-            }), -- BackgroundDecoration
-            onPressed: () =>
-              self.style.background.style.alpha = 0.8
-            onReleased: () =>
-              self.style.background.style.alpha = 1
-              intervals.timer = nil
-          }) -- Button
-        }
-      }) -- Row
+      Label({
+        text: input.value,
+        width: screenWidth - 100,
+        background: BackgroundDecoration({
+          color: taskColor,
+          usePadding: 'inner-padding',
+          innerPadding: 5,
+          borderRadius: 5
+        })
+      }), -- Label
+      Button({
+        id: 'done',
+        text: 'Feito'
+        width: 100,
+        background: BackgroundDecoration({
+          color: taskColor,
+          usePadding: 'inner-padding',
+          innerPadding: 5,
+          borderRadius: 5
+        }),
+        onPressed: () =>
+          self.style.background.style.color = { 0.2, 0.2, 0.2 }
+      }) -- Button
     }
-  }) -- Column
-}) -- Center
+  }) -- Row
 
-love.draw = ->
-  for name, interval in pairs intervals do await(interval)
+global root = Column({
+  children: {
+    Label({
+      text: 'Lista de Compras'
+      width: screenWidth,
+      height: 50
+    }), -- Label
+    Row({
+      id: 'controller'
+      children: {
+        Input({
+          id: 'task-name',
+          width: screenWidth-100,
+          height: 50,
+          textStyle: TextStyle({
+            color: Colors.white
+          }), -- TextStyle
+          background: BackgroundDecoration({
+            color: { 0.15, 0.15, 0.15 },
+            usePadding: 'inner-padding',
+            innerPadding: 5,
+            borderRadius: 5,
+            borderAlpha: 0
+          }) -- BackgroundDecoration
+        }), -- Input
+        Button({
+          width: 100,
+          height: 50,
+          text: 'Adicionar',
+          background: BackgroundDecoration({
+            color: { 0.1, 0.1, 0.1 },
+            usePadding: 'inner-padding',
+            innerPadding: 5,
+            borderRadius: 5
+          }),
+          onPressed: () =>
+            self.style.background.style.color = { 0.2, 0.2, 0.2 }
+          onReleased: () =>
+            self.style.background.style.color = { 0.1, 0.1, 0.1 }
+            taskName = root.getElementById('controller').getElementById('task-name')
+            taskList = root.getElementById('task-list')
+            if (taskName.value != "")
+              task = Task({ input: taskName })
+              
+              done = task.getElementById('done')
+              done.setEvent('onrelease', () =>
+                animation = tween.new(0.25, task.style, { x: -task.style.width }, 'inOutSine')
+
+                animation.onComplete = () =>
+                  taskList.remove(task)
+                  remove(animationList, animation)
+
+                animation.onUpdate = task.align
+
+                table.insert(animationList, animation)
+              )
+
+              taskList.append(task)
+        }) -- Button
+      }
+    }), -- Row
+    Column({
+      id: 'task-list',
+      width: windowWidth,
+      height: windowHeight,
+      children: {}
+    }) -- Column
+  }
+}) -- Column
+
+local logo
+
+love.load = () ->
+  -- Experimental!!
+  logo = http.request('https://love2d.org/style/logo.png')
+  logo = love.filesystem.newFileData(logo, 'logo.png')
+  logo = love.graphics.newImage(logo)
+
+love.update = (dt) ->
+  for animation in *animationList
+    animation::update(dt)
+
+love.draw = () ->
+  love.graphics.draw(logo)
   root.draw()
 
 love.mousepressed = (x, y) ->
   root.onPressed(x, y)
 
-love.mousereleased = ->
+love.mousereleased = () ->
   root.onReleased()
 
 love.textinput = (t) ->
-  root.callfn('textInput', { t })
+  root.call('textInput', { t })
 
 love.keypressed = (key) ->
-  root.callfn('keyPressed', { key })
+  root.call('keyPressed', { key })

@@ -32,9 +32,7 @@ love.draw = ->
 
 For now this project is just experimental and you shouldn't use it for big projects. I didn't bug check it yet. If you find some bug you can send it to 'Issues'
 
-**Update**
-
-This project is still experimental but I made some big advancements. I'm experimenting things like https request so this project could be used for more advanced stuff. I call this project phase as *writing examples and fixing bugs* also need to create more components as the projects grow more and more.
+**Update**: This project is still experimental but I made some big advancements. I'm experimenting things like https request so this project could be used for more advanced stuff. I call this project phase as *writing examples and fixing bugs* also need to create more components as the projects grow more and more.
 
 ## Documentation
 

@@ -1,4 +1,4 @@
-import 'Sapphire'
+Sapphire = require('Sapphire')
 Sapphire.toGlobalScope()
 
 import 'modules.tween'
